@@ -162,7 +162,7 @@ const login = wrapper(async (req, res) => {
 // 1. example
 const getHome = wrapper(() => 'Hello World!');
 // 2. example
-const getHome = wrapper(() => ({message: "Hello World!"});
+const getHome = wrapper(() => ({message: 'Hello World!'}));
 // 3. example
 const login = wrapper(async (req, res) => {
   const user = await getUserById(req.params.id);
