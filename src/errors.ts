@@ -1,5 +1,7 @@
-import httpStatus from 'http-status';
-import type {BodyMessage, HttpErrorBody, HttpStatusNumber} from './types';
+import {HttpStatus} from './enums';
+import type {BodyMessage, HttpErrorBody, OnyNumOf, ValueOf} from './types';
+
+type HttpStatusNumber = OnyNumOf<ValueOf<typeof HttpStatus>>;
 
 /**
  * Get a human-readable error name from the HTTP status code.
@@ -8,7 +10,11 @@ import type {BodyMessage, HttpErrorBody, HttpStatusNumber} from './types';
  */
 export const getErrorName = (status: number): string => {
   if (status < 400 || status > 511) return 'HttpError';
-  const name = httpStatus[`${status as HttpStatusNumber}_NAME`]
+  // Find the key corresponding to the given status code
+  const statusKey = HttpStatus[`${status as HttpStatusNumber}_NAME`];
+  // If the status code is not found, return a generic error name
+  if (!statusKey) return 'HttpError';
+  const name = statusKey
     .toLowerCase()
     .replace(/_/g, ' ')
     .replace(/\b\w/g, char => char.toUpperCase())
@@ -28,7 +34,7 @@ export class HttpError extends Error {
    */
   constructor(
     readonly msg: BodyMessage,
-    readonly status: number = httpStatus.INTERNAL_SERVER_ERROR,
+    readonly status: number = HttpStatus.INTERNAL_SERVER_ERROR,
     readonly detail?: object,
   ) {
     super();
@@ -58,7 +64,7 @@ export class HttpError extends Error {
  */
 export class BadRequestError extends HttpError {
   constructor(message: BodyMessage, detail?: object) {
-    super(message, httpStatus.BAD_REQUEST, detail);
+    super(message, HttpStatus.BAD_REQUEST, detail);
   }
 }
 
@@ -68,7 +74,7 @@ export class BadRequestError extends HttpError {
  */
 export class ConflictError extends HttpError {
   constructor(message: BodyMessage, detail?: object) {
-    super(message, httpStatus.CONFLICT, detail);
+    super(message, HttpStatus.CONFLICT, detail);
   }
 }
 
@@ -78,7 +84,7 @@ export class ConflictError extends HttpError {
  */
 export class ForbiddenError extends HttpError {
   constructor(message: BodyMessage, detail?: object) {
-    super(message, httpStatus.FORBIDDEN, detail);
+    super(message, HttpStatus.FORBIDDEN, detail);
   }
 }
 
@@ -88,7 +94,7 @@ export class ForbiddenError extends HttpError {
  */
 export class NotFoundError extends HttpError {
   constructor(message: BodyMessage, detail?: object) {
-    super(message, httpStatus.NOT_FOUND, detail);
+    super(message, HttpStatus.NOT_FOUND, detail);
   }
 }
 
@@ -98,7 +104,7 @@ export class NotFoundError extends HttpError {
  */
 export class UnauthorizedError extends HttpError {
   constructor(message: BodyMessage, detail?: object) {
-    super(message, httpStatus.UNAUTHORIZED, detail);
+    super(message, HttpStatus.UNAUTHORIZED, detail);
   }
 }
 
@@ -108,6 +114,6 @@ export class UnauthorizedError extends HttpError {
  */
 export class InternalServerError extends HttpError {
   constructor(message: BodyMessage, detail?: object) {
-    super(message, httpStatus.INTERNAL_SERVER_ERROR, detail);
+    super(message, HttpStatus.INTERNAL_SERVER_ERROR, detail);
   }
 }

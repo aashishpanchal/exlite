@@ -1,4 +1,4 @@
-import httpStatus from 'http-status';
+import {HttpStatus} from './enums';
 
 /**
  * ApiRes class for standardizing API responses
@@ -12,7 +12,7 @@ export class ApiRes {
    */
   constructor(
     readonly result: any = {},
-    readonly status: number = httpStatus.OK,
+    readonly status: number = HttpStatus.OK,
     readonly message: string = 'Operation successful',
   ) {}
 
@@ -38,7 +38,7 @@ export class ApiRes {
     result: any,
     message: string = 'Request processed successfully',
   ): ApiRes {
-    return new ApiRes(result, httpStatus.OK, message);
+    return new ApiRes(result, HttpStatus.OK, message);
   }
 
   /**
@@ -51,7 +51,7 @@ export class ApiRes {
     result: any,
     message: string = 'Resource created successfully',
   ): ApiRes {
-    return new ApiRes(result, httpStatus.CREATED, message);
+    return new ApiRes(result, HttpStatus.CREATED, message);
   }
 
   /**
@@ -66,6 +66,6 @@ export class ApiRes {
     meta: object,
     message: string = 'Data retrieved successfully',
   ): ApiRes {
-    return new ApiRes({...meta, data}, httpStatus.OK, message);
+    return new ApiRes({...meta, data}, HttpStatus.OK, message);
   }
 }

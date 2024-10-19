@@ -10,9 +10,7 @@
 - [Features](#features)
 - [Installation](#installation)
 - [Quick Start](#quick-start)
-- [Middleware](#middleware)
-  - [Error Handling Middleware: `errorHandler`](#1-error-handling-middleware-errorhandler)
-  - [Not Found Handler: `notFoundHandler`](#2-not-found-handler-notfoundhandler)
+- [Error Handling Middleware: `errorHandler`](#error-handling-middleware-errorhandler)
 - [Wrapper: Simplifying Controllers](#wrapper-simplifying-controllers)
 - [Http-Error](#http-error)
 - [Http-Status](#http-status)
@@ -46,7 +44,7 @@ Here’s a minimal setup to get you started with `exlite`:
 
 ```tsx
 import express from 'express';
-import {wrapper, errorHandler, notFoundHandler} from 'exlite';
+import {wrapper, errorHandler} from 'exlite';
 
 const app = express();
 
@@ -63,7 +61,6 @@ const getUser = wrapper(async (req, res) => {
 app.get('/user/:id', getUser);
 
 // Error handling middleware
-app.use(notFoundHandler());
 app.use(errorHandler());
 
 app.listen(3000, () => {
@@ -71,11 +68,9 @@ app.listen(3000, () => {
 });
 ```
 
-## Middleware
+## Error Handling Middleware: `errorHandler`
 
-### 1. Error Handling Middleware: `errorHandler`
-
-`errorHandler(isDev: boolean): ErrorRequestHandler` Global error handler middleware that manages `HttpErrors` and unknown errors, returning appropriate JSON responses.
+`errorHandler({isDev: boolean, write?: (err) => void}): ErrorRequestHandler` Global error handler middleware that manages `HttpErrors` and unknown errors, returning appropriate JSON responses.
 
 **Usage:**
 
@@ -85,19 +80,10 @@ import {errorHandler} from 'exlite';
 app.use(errorHandler()); // Place this after route definitions
 ```
 
-_Note: `isDev` indicates whether the application is in development mode. Default is `true`._
+_Note:_
 
-### 2. Not Found Handler: `notFoundHandler`
-
-`notFoundHandler(): Router` Provides a default response for undefined routes, ensuring a clean, standardized 404 response without additional boilerplate code.
-
-**Usage:**
-
-```tsx
-import {notFoundHandler} from 'exlite';
-
-app.use(notFoundHandler()); // This should be placed after your routes
-```
+- _`isDev` A flag that indicates whether the application is running in development mode. If true, error responses will include detailed information like the error message and stack trace. Defaults to true._
+- _`write` An optional callback function that logs or processes unknown errors. This can be used to log errors to a file or an external service for further inspection.._
 
 ## Wrapper: Simplifying Controllers
 

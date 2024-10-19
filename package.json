@@ -1,6 +1,6 @@
 {
   "name": "exlite",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Exlite is a lightweight utility library for express.js",
   "main": "dist/index.js",
   "module": "dist/index.mjs",
@@ -40,9 +40,6 @@
     "rimraf": "^6.0.1",
     "tsup": "^8.3.0",
     "typescript": "~5.5.4"
-  },
-  "dependencies": {
-    "http-status": "1.7.4"
   },
   "keywords": [
     "express",
