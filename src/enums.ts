@@ -3,7 +3,7 @@
  *
  * @publicApi http-status code
  */
-export const HttpStatus = {
+export const HttpStatus = Object.freeze({
   /** Continue with the request. */
   CONTINUE: 100,
   '100_NAME': 'CONTINUE',
@@ -219,4 +219,4 @@ export const HttpStatus = {
   /** Network authentication required. */
   NETWORK_AUTHENTICATION_REQUIRED: 511,
   '511_NAME': 'NETWORK_AUTHENTICATION_REQUIRED',
-} as const;
+});
