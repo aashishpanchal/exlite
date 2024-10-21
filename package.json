@@ -1,10 +1,19 @@
 {
   "name": "exlite",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Exlite is a lightweight utility library for express.js",
-  "main": "dist/index.js",
-  "module": "dist/index.mjs",
-  "types": "dist/index.d.ts",
+  "main": "./dist/cjs/index.js",
+  "module": "./dist/esm/index.js",
+  "exports": {
+    "import": {
+      "default": "./dist/esm/index.js",
+      "types": "./dist/esm/index.d.ts"
+    },
+    "require": {
+      "default": "./dist/cjs/index.js",
+      "types": "./dist/cjs/index.d.ts"
+    }
+  },
   "files": [
     "dist",
     "LICENSE"
@@ -13,9 +22,10 @@
     "node": ">=16.20.1"
   },
   "scripts": {
-    "lint": "eslint --fix \"./src/**/*.ts\"",
+    "dev": "tsc -b --watch ./tsconfig.esm.json ./tsconfig.cjs.json",
+    "build": "rimraf dist && tsc -b ./tsconfig.esm.json ./tsconfig.cjs.json",
     "format": "prettier --write \"**/*.{ts,js}\"",
-    "build": "rimraf dist && tsup src/index.ts --format cjs,esm --dts --clean"
+    "lint": "eslint --fix \"./src/**/*.ts\""
   },
   "repository": {
     "type": "git",
@@ -38,13 +48,14 @@
     "eslint-plugin-prettier": "^5.2.1",
     "prettier": "^3.3.3",
     "rimraf": "^6.0.1",
-    "tsup": "^8.3.0",
     "typescript": "~5.5.4"
   },
   "keywords": [
     "express",
     "exlite",
     "helper",
+    "utility",
+    "express-helper",
     "tsyringe",
     "http-status",
     "http-errors"
