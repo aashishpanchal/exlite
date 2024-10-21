@@ -1,6 +1,6 @@
 import type {Request, Response, NextFunction} from 'express';
 
-// valueOf
+// utils types
 export type ValueOf<T> = T[keyof T];
 export type OnlyNumOf<K> = K extends number ? K : null;
 

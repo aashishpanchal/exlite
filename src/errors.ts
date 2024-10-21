@@ -56,6 +56,14 @@ export class HttpError extends Error {
     if (this.detail) obj['detail'] = this.detail;
     return obj;
   }
+
+  /**
+   * Check if the given error is an instance of HttpError.
+   * @param {unknown} err - The error to check.
+   * @returns {boolean} - True if the error is an instance of HttpError, false otherwise.
+   */
+  public static isHttpError = (err: unknown): err is HttpError =>
+    err instanceof HttpError;
 }
 
 /**
@@ -99,12 +107,32 @@ export class NotFoundError extends HttpError {
 }
 
 /**
- * Represents an Unauthorized HTTP error (401).
+ * Represents an UnAuthorized HTTP error (401).
  * @extends {HttpError}
  */
-export class UnauthorizedError extends HttpError {
+export class UnAuthorizedError extends HttpError {
   constructor(message: BodyMessage, detail?: object) {
     super(message, HttpStatus.UNAUTHORIZED, detail);
+  }
+}
+
+/**
+ * Represents a Not Implemented HTTP error (501).
+ * @extends {HttpError}
+ */
+export class NotImplementedError extends HttpError {
+  constructor(message: BodyMessage, detail?: object) {
+    super(message, HttpStatus.NOT_IMPLEMENTED, detail);
+  }
+}
+
+/**
+ * Represents a Payment Required HTTP error (402).
+ * @extends {HttpError}
+ */
+export class PaymentRequiredError extends HttpError {
+  constructor(message: BodyMessage, detail?: object) {
+    super(message, HttpStatus.PAYMENT_REQUIRED, detail);
   }
 }
 
