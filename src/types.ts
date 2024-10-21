@@ -1,8 +1,12 @@
+import type {HttpStatus} from './enums';
 import type {Request, Response, NextFunction} from 'express';
 
 // utils types
-export type ValueOf<T> = T[keyof T];
-export type OnlyNumOf<K> = K extends number ? K : null;
+type ValueOf<T> = T[keyof T];
+type OnlyNumOf<K> = K extends number ? K : null;
+
+// Define a type of HttpStatus only number
+export type HttpStatusNumber = OnlyNumOf<ValueOf<typeof HttpStatus>>;
 
 // Define a type for the body message of HTTP errors
 export type BodyMessage = string | string[];
