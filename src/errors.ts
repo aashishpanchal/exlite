@@ -1,7 +1,7 @@
 import {HttpStatus} from './enums';
-import type {BodyMessage, HttpErrorBody, OnyNumOf, ValueOf} from './types';
+import type {BodyMessage, HttpErrorBody, OnlyNumOf, ValueOf} from './types';
 
-type HttpStatusNumber = OnyNumOf<ValueOf<typeof HttpStatus>>;
+type HttpStatusNumber = OnlyNumOf<ValueOf<typeof HttpStatus>>;
 
 /**
  * Get a human-readable error name from the HTTP status code.

@@ -2,7 +2,7 @@ import type {Request, Response, NextFunction} from 'express';
 
 // valueOf
 export type ValueOf<T> = T[keyof T];
-export type OnyNumOf<K> = K extends number ? K : null;
+export type OnlyNumOf<K> = K extends number ? K : null;
 
 // Define a type for the body message of HTTP errors
 export type BodyMessage = string | string[];
