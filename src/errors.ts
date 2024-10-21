@@ -59,11 +59,11 @@ export class HttpError extends Error {
 
   /**
    * Check if the given error is an instance of HttpError.
-   * @param {unknown} err - The error to check.
+   * @param {unknown} value - The error to check.
    * @returns {boolean} - True if the error is an instance of HttpError, false otherwise.
    */
-  public static isHttpError = (err: unknown): err is HttpError =>
-    err instanceof HttpError;
+  public static isHttpError = (value: unknown): value is HttpError =>
+    value instanceof HttpError;
 }
 
 /**

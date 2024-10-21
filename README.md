@@ -10,7 +10,8 @@
 - [Features](#features)
 - [Installation](#installation)
 - [Quick Start](#quick-start)
-- [Error Handling Middleware: `errorHandler`](#error-handling-middleware-errorhandler)
+- [Error Handler Middleware: `errorHandler`](#error-handler-middleware-errorhandler)
+- [HttpError Handler Middleware: `httpErrorHandler`](#httperror-handler-middleware-httperrorhandler)
 - [Wrapper: Simplifying Controllers](#wrapper-simplifying-controllers)
 - [Http-Error](#http-error)
 - [Http-Status](#http-status)
@@ -42,7 +43,7 @@ npm install --save exlite
 
 Here’s a minimal setup to get you started with `exlite`:
 
-```tsx
+```typescript
 import express from 'express';
 import {wrapper, errorHandler} from 'exlite';
 
@@ -68,22 +69,47 @@ app.listen(3000, () => {
 });
 ```
 
-## Error Handling Middleware: `errorHandler`
+## Error Handler Middleware: `errorHandler`
 
-`errorHandler({isDev: boolean, write?: (err) => void}): ErrorRequestHandler` Global error handler middleware that manages `HttpErrors` and unknown errors, returning appropriate JSON responses.
+`errorHandler({dev: boolean, write?: (err) => void}): ErrorRequestHandler` Global error handler middleware that manages `HttpErrors` and unknown errors, returning appropriate JSON responses.
 
 **Usage:**
 
-```tsx
+```typescript
 import {errorHandler} from 'exlite';
 
-app.use(errorHandler()); // Place this after route definitions
+// Basic usage with default options
+app.use(errorHandler({dev: process.env.NODE_ENV !== 'production'}));
+
+// Custom usage with logging in production mode
+app.use(
+  errorHandler({
+    dev: process.env.NODE_ENV !== 'production',
+    write: err => logger.error(err),
+  }),
+);
 ```
 
 _Note:_
 
-- _`isDev` A flag that indicates whether the application is running in development mode. If true, error responses will include detailed information like the error message and stack trace. Defaults to true._
-- _`write` An optional callback function that logs or processes unknown errors. This can be used to log errors to a file or an external service for further inspection.._
+- _`dev` is a flag that indicates whether the application is running in development mode. If true, error responses will include detailed information like the error message and stack trace. Defaults to true._
+- _`write` is an optional callback function that logs or processes unknown errors. This can be used to log errors to a file or an external service for further inspection._
+
+## HttpError Handler Middleware: `httpErrorHandler`
+
+The `httpErrorHandler` middleware specifically handles `HttpError` instances, sending JSON responses with the error status and message. and `Non-HttpError` errors are passed to the next middleware.
+
+**Usage:**
+
+```typescript
+import {httpErrorHandler} from 'exlite';
+
+app.use(httpErrorHandler); // Place this after route definitions
+```
+
+_**Important Note:**_
+
+- _If you are using `httpErrorHandler`, ensure that you also handle unknown errors appropriately, as it will not log them. It is not recommended to use both `errorHandler` and `httpErrorHandler` simultaneously to avoid conflicts._
 
 ## Wrapper: Simplifying Controllers
 
@@ -91,7 +117,7 @@ In Express.js applications, request handler functions typically require `try-cat
 
 **Usage:**
 
-```tsx
+```typescript
 import {wrapper, ApiRes} from 'exlite';
 
 // Route without wrapper (traditional approach with try-catch)
@@ -116,7 +142,7 @@ app.get(
 
 - **Example of manipulating cookies and header, etc with `ApiRes`**
 
-```tsx
+```typescript
 const login = wrapper(async (req, res) => {
   const {email, password} = req.body;
   const user = await loginUser(email, password);
@@ -144,7 +170,7 @@ const login = wrapper(async (req, res) => {
 
 - **Example without `ApiRes`**
 
-```tsx
+```typescript
 // 1. example
 const getHome = wrapper(() => 'Hello World!');
 // 2. example
@@ -174,7 +200,7 @@ const login = wrapper(async (req, res) => {
 
 - **Example as `middleware`**
 
-```tsx
+```typescript
 import {Role} from './constants';
 import {wrapper, ForbiddenError} from 'exlite';
 
@@ -206,7 +232,7 @@ The `HttpError` class standardizes error handling by extending the native `Error
 
 **Usage:**
 
-```tsx
+```typescript
 import {HttpError, HttpStatus} from 'exlite';
 
 // Example without wrapper
@@ -229,7 +255,7 @@ app.post(
 - `status` - the status code of the error, mirroring `statusCode` for general compatibility, default is `500`
 - `detail` - this is an `optional` plain object that contains additional information about the error.
 
-```tsx
+```typescript
 const err = new HttpError('Validation error.', 400, {
   username: 'Username is required',
   password: 'Password is required',
@@ -239,13 +265,68 @@ const err = new HttpError('Validation error.', 400, {
 **Provide build common http-errors.**
 
 - `BadRequestError`
-- `UnauthorizedError`
+- `UnAuthorizedError`
 - `NotFoundError`
 - `ConflictError`
 - `ForbiddenError`
+- `PaymentRequiredError`
+- `NotImplementedError`
 - `InternalServerError`
 
 _Note: If only provides a status code, the `HttpError` class will automatically generate an appropriate error name based on that status code._
+
+**`createError.isHttpError(value)`**
+
+The `HttpError.isHttpError(value)` method is a useful way to determine if a specific value is an instance of the `HttpError` class. It will return `true` if the value is derived from the `HttpError` constructor, allowing you to easily identify HTTP-related errors in your application.
+
+```typescript
+// If it is an HttpError, send a JSON response with the error details
+if (HttpError.isHttpError(err))
+  return res.status(err.status).json(err.toJson());
+else {
+  // If it's not an HttpError, pass it to the next middleware for further handling
+  next(err);
+}
+```
+
+### Error Properties
+
+When you create an instance of `HttpError`, it comes with several useful properties that help provide context about the error:
+
+- **`status`**: The HTTP status code associated with the error (e.g., 404 for Not Found, 500 for Internal Server Error).
+- **`message`**: A brief description of the error, which is useful for debugging and logging.
+- **`stack`**: The stack trace of the error, available when the application is in development mode. This helps identify where the error occurred in your code.
+- **`details`**: An optional property that can hold additional information about the error, such as validation issues or other relevant data.
+
+### Custom ErrorHandler Middleware
+
+```typescript
+export const errorHandler: ErrorRequestHandler = (err, req, res, next): any => {
+  // Handle known HttpError instances
+  if (HttpError.isHttpError(err))
+    return res.status(err.status).json(err.toJson());
+
+  // Log unknown errors
+  logger.error(err);
+
+  // Create an InternalServerError for unknown errors
+  const error = new InternalServerError(
+    config.dev ? err.message : 'Something went wrong',
+    config.dev ? err.stack : null,
+  );
+  return res.status(error.status).json(error.toJson());
+};
+```
+
+### `toJson` Static Method
+
+The `toJson` method is a static function that allows you to convert an `HttpError` instance into a structured JSON format. This is particularly useful for standardizing error responses sent to clients. When you call `toJson`, it returns an object containing the following properties:
+
+- **`status`**: The HTTP status code of the error.
+- **`message`**: A human-readable message describing the error.
+- **`details`** (if applicable): Any additional information that provides context about the error.
+
+This method ensures that your API consistently responds to errors in a uniform way, making it easier for clients to understand and handle error responses.
 
 ## Http-Status
 
@@ -253,7 +334,7 @@ The `HttpStatus` is utility to interact with HTTP status codes. **(2xx, 3xx, 4xx
 
 **Usage:**
 
-```tsx
+```typescript
 import {HttpStatus} from 'exlite';
 
 app.get('/status-example', (req, res) => {
@@ -267,7 +348,7 @@ app.get('/status-example', (req, res) => {
 
 **Usage:**
 
-```tsx
+```typescript
 import {ApiRes} from 'exlite';
 
 // with paginated
@@ -312,7 +393,7 @@ The `createController` function simplifies this process by providing an easy way
 
 **Usage:** without `tsyringe`
 
-```tsx
+```typescript
 // create a controller with a local instance.
 const controller = createController(Controller, false);
 ...
@@ -322,7 +403,7 @@ const handler = controller.getMethod('class-method-name');
 
 - Controller `class`
 
-```tsx
+```typescript
 // auth.controller.ts
 import {ApiRes} from 'exlite';
 import {AuthService} from './auth.service';
@@ -388,7 +469,7 @@ you need to configure your project as follows:
     ```
 3.  Import `reflect-metadata` in your main file (e.g., `app.ts` or `server.ts`):
 
-    ```tsx
+    ```typescript
     import 'reflect-metadata';
     ```
 
@@ -404,7 +485,7 @@ const handler = controller.getMethod('class-method-name');
 
 - Service `class`
 
-```tsx
+```typescript
 // auth.service.ts
 import {singleton} from 'tsyringe';
 
@@ -422,7 +503,7 @@ export class AuthService {
 
 - Controller `class`
 
-```tsx
+```typescript
 // auth.controller.ts
 import {singleton} from 'tsyringe';
 import {AuthService} from './auth.service.ts';
@@ -456,7 +537,7 @@ export class AuthController {
 
 - Router configuration
 
-```tsx
+```typescript
 // auth.routes.ts
 import {Router} from 'express';
 import {createController} from 'exlite';

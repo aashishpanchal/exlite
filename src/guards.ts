@@ -2,43 +2,38 @@ import {type ErrorRequestHandler} from 'express';
 import {HttpError, InternalServerError} from './errors';
 
 type Options = {
-  isDev?: boolean;
+  dev?: boolean;
   write?: (err: unknown) => void;
 };
 
 /**
- * Creates an Express error-handling middleware function.
+ * Express middleware to handle `HttpError` and unknown errors.
  *
- * This middleware handles both known errors (instances of `HttpError`) and unknown errors, providing appropriate
- * JSON responses based on the environment (development or production). In development mode (`isDev`), the middleware
- * includes detailed error messages and stack traces in the response for easier debugging. In production mode, error
- * details are omitted for security reasons.
+ * - Sends JSON response for `HttpError` instances.
+ * - Logs unknown errors and sends generic error response.
+ * - Includes detailed error info in development (`dev`).
  *
- * @param {Object} [options] - The configuration options for the error handler.
- * @param {boolean} [options.isDev=true] - A flag that indicates whether the application is running in development mode.
- * If `true`, error responses will include detailed information like the error message and stack trace. Defaults to `true`.
- * @param {(err: unknown) => void} [options.write] - An optional callback function that logs or processes unknown errors.
- * This can be used to log errors to a file or an external service for further inspection.
+ * @param {Object} [options] - Options for error handling.
+ * @param {boolean} [options.dev=true] - Show detailed error info in development. default `true`
+ * @param {(err: unknown) => void} [options.write] - Function to log unknown errors. `optional`
  *
- * @returns {ErrorRequestHandler} - An Express middleware function that intercepts errors, providing appropriate JSON
- * responses based on the error type and environment.
+ * @returns {ErrorRequestHandler} - Middleware for handling errors.
  *
  * @example
  * // Basic usage with default options:
- * app.use(errorHandler());
+ * app.use(errorHandler({ dev: process.env.NODE_ENV !== 'production' }));
  *
- * @example
  * // Custom usage with logging in production mode:
  * app.use(errorHandler({
- *   isDev: process.env.NODE_ENV !== 'production',
- *   write: (err) => logger.error(err)
+ *  dev: process.env.NODE_ENV !== 'production',
+ *  write: err => logger.error(err)
  * }));
  */
-export const errorHandler =
-  ({isDev, write}: Options = {isDev: true}): ErrorRequestHandler =>
-  (err, req, res, next): any => {
+export const errorHandler = (options: Options = {}): ErrorRequestHandler => {
+  const {dev = true, write} = options;
+  return (err, req, res, next): any => {
     // Handle known HttpError instances
-    if (err instanceof HttpError)
+    if (HttpError.isHttpError(err))
       return res.status(err.status).json(err.toJson());
 
     // Log unknown errors if a write function is provided
@@ -46,8 +41,33 @@ export const errorHandler =
 
     // Create an InternalServerError for unknown errors
     const error = new InternalServerError(
-      isDev ? err.message : 'Something went wrong',
-      isDev ? err.stack : null,
+      dev ? err.message : 'Something went wrong',
+      dev ? err.stack : null,
     );
     return res.status(error.status).json(error.toJson());
   };
+};
+
+/**
+ * Middleware to handle `HttpError` instances in Express.
+ *
+ * - Sends JSON response with the error status and message.
+ * - Passes non-HttpError errors to the next middleware.
+ *
+ * @returns {ErrorRequestHandler} - Middleware for handling HTTP-specific errors.
+ *
+ * @example
+ * app.use(httpErrorHandler);
+ */
+export const httpErrorHandler: ErrorRequestHandler = (
+  err,
+  req,
+  res,
+  next,
+): any => {
+  // Handle known HttpError instance
+  if (HttpError.isHttpError(err))
+    return res.status(err.status).json(err.toJson());
+  // unknown error to forward next middleware
+  next(err);
+};
