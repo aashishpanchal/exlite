@@ -1,0 +1,57 @@
+{
+  "name": "exlite",
+  "version": "0.1.2",
+  "description": "Simple utility library for express.js",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "require": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist",
+    "LICENSE"
+  ],
+  "engines": {
+    "node": ">=16.20.1"
+  },
+  "scripts": {
+    "build": "rimraf dist && tsup src/index.ts --format cjs --dts --clean",
+    "format": "prettier --write \"./src/**/*.{ts,js}\"",
+    "lint": "eslint \"./src/**/*.{ts,js}\" --fix",
+    "clean": "rimraf dist"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/aashishpanchal/exlite.git"
+  },
+  "author": "Aashish Panchal <aipanchal51@gmail.com>",
+  "license": "MIT",
+  "peerDependencies": {
+    "express": "^4.21.0",
+    "tsyringe": "^4.8.0"
+  },
+  "devDependencies": {
+    "@repo/eslint-config": "workspace:*",
+    "@repo/tsconfig": "workspace:*",
+    "@types/express": "^5.0.0",
+    "@types/node": "^22.7.9",
+    "eslint": "8.57.1",
+    "prettier": "^3.3.3",
+    "rimraf": "^6.0.1",
+    "tsup": "^8.3.0",
+    "typescript": "~5.5.4"
+  },
+  "keywords": [
+    "express",
+    "exlite",
+    "helper",
+    "utility",
+    "express-helper",
+    "tsyringe",
+    "http-status",
+    "http-errors"
+  ],
+  "homepage": "https://github.com/aashishpanchal/exlite#readme"
+}

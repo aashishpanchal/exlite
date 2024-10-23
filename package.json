@@ -1,64 +1,28 @@
 {
-  "name": "exlite",
-  "version": "0.1.2",
-  "description": "Exlite is a lightweight utility library for express.js",
-  "main": "./dist/cjs/index.js",
-  "module": "./dist/esm/index.js",
-  "exports": {
-    "import": {
-      "default": "./dist/esm/index.js",
-      "types": "./dist/esm/index.d.ts"
-    },
-    "require": {
-      "default": "./dist/cjs/index.js",
-      "types": "./dist/cjs/index.d.ts"
-    }
-  },
-  "files": [
-    "dist",
-    "LICENSE"
-  ],
+  "name": "@exlite/repo",
+  "version": "0.0.1",
+  "description": "Exlite Repo",
+  "private": true,
   "engines": {
     "node": ">=16.20.1"
   },
+  "author": "Aashish Panchal <aipanchal51@gmail.com>",
+  "license": "MIT",
   "scripts": {
-    "dev": "tsc -b --watch ./tsconfig.esm.json ./tsconfig.cjs.json",
-    "build": "rimraf dist && tsc -b ./tsconfig.esm.json ./tsconfig.cjs.json",
-    "format": "prettier --write \"**/*.{ts,js}\"",
-    "lint": "eslint --fix \"./src/**/*.ts\""
+    "build": "pnpm --parallel build",
+    "lint": "pnpm --parallel lint",
+    "clean": "pnpm --parallel clean",
+    "format": "pnpm --parallel format"
   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/aashishpanchal/exlite.git"
   },
-  "author": "Aashish Panchal <aipanchal51@gmail.com>",
-  "license": "MIT",
-  "peerDependencies": {
-    "express": "^4.21.0",
-    "tsyringe": "^4.8.0"
-  },
   "devDependencies": {
-    "@types/express": "^5.0.0",
-    "@types/node": "^22.7.5",
-    "@typescript-eslint/eslint-plugin": "^8.8.1",
-    "@typescript-eslint/parser": "^8.8.1",
+    "@types/node": "^22.7.9",
     "eslint": "8.57.1",
-    "eslint-config-prettier": "^9.1.0",
-    "eslint-define-config": "^2.1.0",
-    "eslint-plugin-prettier": "^5.2.1",
     "prettier": "^3.3.3",
-    "rimraf": "^6.0.1",
     "typescript": "~5.5.4"
   },
-  "keywords": [
-    "express",
-    "exlite",
-    "helper",
-    "utility",
-    "express-helper",
-    "tsyringe",
-    "http-status",
-    "http-errors"
-  ],
-  "homepage": "https://github.com/aashishpanchal/exlite#readme"
+  "packageManager": "pnpm@9.5.0"
 }

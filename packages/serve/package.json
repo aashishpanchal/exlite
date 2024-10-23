@@ -1,0 +1,39 @@
+{
+  "name": "@exlite/serve",
+  "version": "0.0.1",
+  "description": "Serve static websites (SPA's) using @exlite/serve",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "require": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist",
+    "LICENSE"
+  ],
+  "scripts": {
+    "build": "rimraf dist && tsup src/index.ts --format cjs --dts --clean",
+    "format": "prettier --write \"./src/**/*.{ts,js}\"",
+    "lint": "eslint \"./src/**/*.{ts,js}\" --fix",
+    "clean": "rimraf dist"
+  },
+  "peerDependencies": {
+    "express": "^4.21.0"
+  },
+  "dependencies": {
+    "path-to-regexp": "^8.2.0"
+  },
+  "devDependencies": {
+    "@repo/eslint-config": "workspace:*",
+    "@repo/tsconfig": "workspace:*",
+    "@types/express": "^5.0.0",
+    "@types/node": "^22.7.9",
+    "eslint": "^8.57.1",
+    "prettier": "^3.3.3",
+    "rimraf": "^6.0.1",
+    "tsup": "^8.3.0",
+    "typescript": "^5.6.2"
+  }
+}
