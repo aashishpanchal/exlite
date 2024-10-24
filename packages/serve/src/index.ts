@@ -1,60 +1,44 @@
 import path from 'path';
-import express from 'express';
+import express, {RequestHandler, Router} from 'express';
 import {match} from 'path-to-regexp';
-import type {Request, RequestHandler, Router} from 'express';
 
 type Options = {
-  root?: string;
-  render?: string;
+  rootPath?: string;
+  renderPath?: string;
   exclude?: string[];
 };
 
 /**
- * Creates an Express middleware to serve static files and handle routing for a Single Page Application (SPA).
+ * Middleware for serving static files and handling SPA routing in Express.js.
+ * Serves static files from a directory and returns an `index.html` for unmatched routes, excluding specified patterns.
  *
- * This middleware serves static content from a specified directory and returns an index file
- * for any unmatched routes, except those defined in the exclude patterns.
+ * @param {Options} [options={}] - Middleware options.
+ * @param {string} [options.rootPath='public'] - Directory to serve static files from.
+ * @param {string} [options.renderPath='*'] - Route pattern to serve the SPA index file.
+ * @param {string[]} [options.exclude=['/api{/*path}']] - Routes to exclude from SPA handling.
  *
- * @param {Options} [options={}] - Configuration options.
- * @param {string} [options.root='public'] - Directory for static files (default: '`public`' in the current working directory).
- * @param {string} [options.render='*'] - Route pattern to render the index file (default: '`*`').
- * @param {string[]} [options.exclude=['/api{/*path}']] - Routes to exclude from SPA handling (default: excludes `API` routes).
- *
- * @returns {Router} - An Express Router instance for serving static files and SPA routing.
- *
- * @example
- * app.use(serveStatic());
+ * @returns {Router} - Express Router for static file serving and SPA routing.
  */
-export const serveStatic = (options: Options = {}): Router => {
-  const {
-    root = path.join(process.cwd(), 'public'),
-    render = '*',
-    exclude = ['/api{/*path}'],
-  } = options;
-
-  const indexFile = path.join(root, 'index.html');
+export const serveStatic = ({
+  rootPath = path.join(process.cwd(), 'public'),
+  renderPath = '*',
+  exclude = ['/api{/*path}'],
+}: Options = {}): Router => {
+  const indexFile = path.join(rootPath, 'index.html');
   const excludeMatchers = exclude.map(pattern => match(pattern, {end: false}));
 
-  /**
-   * Checks if the request's URL matches any excluded patterns.
-   * @param {Request} req - The incoming request.
-   * @returns {boolean} True if the route is excluded, false otherwise.
-   */
-  const isRouteExcluded = (req: Request) => {
-    const pathname = req.originalUrl.split('?')[0]; // Use split to get pathname efficiently
-    return excludeMatchers.some(matcher => matcher(pathname));
-  };
+  // Determines if the route is excluded
+  const isExcluded = (pathname: string) =>
+    excludeMatchers.some(matcher => matcher(pathname));
 
-  const renderFile: RequestHandler = (req, res, next) => {
-    if (!isRouteExcluded(req)) {
-      res.sendFile(indexFile);
-    } else {
-      next();
-    }
-  };
+  // Renders the index file for non-excluded routes
+  const renderIndex: RequestHandler = (req, res, next) =>
+    isExcluded(req.originalUrl.split('?')[0])
+      ? next()
+      : res.sendFile(indexFile);
 
   return express
     .Router()
-    .use(express.static(root, {index: false}))
-    .get(render, renderFile);
+    .use(express.static(rootPath, {index: false}))
+    .get(renderPath, renderIndex);
 };
