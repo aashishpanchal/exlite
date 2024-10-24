@@ -2,7 +2,6 @@
   "name": "@exlite/serve",
   "version": "0.0.1",
   "description": "Serve static websites (SPA's) using @exlite/serve",
-  "private": true,
   "main": "dist/index.js",
   "module": "dist/index.mjs",
   "types": "dist/index.d.ts",
