@@ -141,6 +141,11 @@ In this example:
 
 This library is inspired by [`@nestjs/serve-static`](https://docs.nestjs.com/recipes/serve-static), bringing similar static file serving functionality to Express.js environments in a lightweight and flexible way.
 
+## Author
+
+- Created by **Aashish Panchal**.
+- GitHub: [@aashishpanchal](https://github.com/aashishpanchal)
+
 ## License
 
-This project is licensed under the MIT License. See the [LICENSE](https://github.com/aashishpanchal/exlite/blob/main/LICENSE) file for more information.
+[MIT © Aashish Panchal ](LICENSE)

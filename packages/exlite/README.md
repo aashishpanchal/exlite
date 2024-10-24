@@ -544,12 +544,11 @@ authRouter
 
 `exlite` is a powerful tool designed to simplify and enhance Express.js applications by providing essential features out of the box. Whether you’re building a simple API or a complex web application, `exlite` helps you maintain clean and manageable code.
 
-## Contributing
-
-Contributions are welcome! Please fork the repository and submit a pull request with your improvements.
-
-**Disclaimer:** This library is currently under development. While contributions are appreciated, there is no need to start begging for features or fixes.
-
 ## Author
 
-- Aashish Panchal [@aashishpanchal](https://github.com/aashishpanchal)
+- Created by **Aashish Panchal**.
+- GitHub: [@aashishpanchal](https://github.com/aashishpanchal)
+
+## License
+
+[MIT © Aashish Panchal ](LICENSE)
