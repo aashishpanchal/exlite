@@ -3,7 +3,7 @@ import {HttpError, InternalServerError} from './errors';
 
 type Options = {
   dev?: boolean;
-  write?: (err: unknown) => void;
+  log?: (err: unknown) => void;
 };
 
 /**
@@ -15,29 +15,31 @@ type Options = {
  *
  * @param {Object} [options] - Options for error handling.
  * @param {boolean} [options.dev=true] - Show detailed error info in development. default `true`
- * @param {(err: unknown) => void} [options.write] - Function to log unknown errors. `optional`
+ * @param {(err: unknown) => void} [options.log] - Function to log unknown errors. default `console.error`
  *
  * @returns {ErrorRequestHandler} - Middleware for handling errors.
  *
  * @example
  * // Basic usage with default options:
- * app.use(errorHandler({ dev: process.env.NODE_ENV !== 'production' }));
+ * app.use(httpErrorHandler({ dev: process.env.NODE_ENV !== 'production' }));
  *
  * // Custom usage with logging in production mode:
- * app.use(errorHandler({
+ * app.use(httpErrorHandler({
  *  dev: process.env.NODE_ENV !== 'production',
- *  write: err => logger.error(err)
+ *  log: err => logger.error(err)
  * }));
  */
-export const errorHandler = (options: Options = {}): ErrorRequestHandler => {
-  const {dev = true, write} = options;
+export const httpErrorHandler = (
+  options: Options = {},
+): ErrorRequestHandler => {
+  const {dev = true, log = console.error} = options;
   return (err, req, res, next): any => {
     // Handle known HttpError instances
     if (HttpError.isHttpError(err))
       return res.status(err.status).json(err.toJson());
 
     // Log unknown errors if a write function is provided
-    write?.(err);
+    log?.(err);
 
     // Create an InternalServerError for unknown errors
     const error = new InternalServerError(
@@ -46,28 +48,4 @@ export const errorHandler = (options: Options = {}): ErrorRequestHandler => {
     );
     return res.status(error.status).json(error.toJson());
   };
-};
-
-/**
- * Middleware to handle `HttpError` instances in Express.
- *
- * - Sends JSON response with the error status and message.
- * - Passes non-HttpError errors to the next middleware.
- *
- * @returns {ErrorRequestHandler} - Middleware for handling HTTP-specific errors.
- *
- * @example
- * app.use(httpErrorHandler);
- */
-export const httpErrorHandler: ErrorRequestHandler = (
-  err,
-  req,
-  res,
-  next,
-): any => {
-  // Handle known HttpError instance
-  if (HttpError.isHttpError(err))
-    return res.status(err.status).json(err.toJson());
-  // unknown error to forward next middleware
-  next(err);
 };

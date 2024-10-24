@@ -10,8 +10,7 @@
 - [Features](#features)
 - [Installation](#installation)
 - [Quick Start](#quick-start)
-- [Error Handler Middleware: `errorHandler`](#error-handler-middleware-errorhandler)
-- [HttpError Handler Middleware: `httpErrorHandler`](#httperror-handler-middleware-httperrorhandler)
+- [Error Handler Middleware: `httpErrorHandler`](#error-handler-middleware-httperrorhandler)
 - [Wrapper: Simplifying Controllers](#wrapper-simplifying-controllers)
 - [Http-Error](#http-error)
 - [Http-Status](#http-status)
@@ -45,7 +44,7 @@ Here’s a minimal setup to get you started with `exlite`:
 
 ```typescript
 import express from 'express';
-import {wrapper, errorHandler} from 'exlite';
+import {wrapper, httpErrorHandler} from 'exlite';
 
 const app = express();
 
@@ -62,16 +61,16 @@ const getUser = wrapper(async (req, res) => {
 app.get('/user/:id', getUser);
 
 // Error handling middleware
-app.use(errorHandler());
+app.use(httpErrorHandler());
 
 app.listen(3000, () => {
   console.log('Server running on port 3000');
 });
 ```
 
-## Error Handler Middleware: `errorHandler`
+## Error Handler Middleware: `httpErrorHandler`
 
-`errorHandler({dev: boolean, write?: (err) => void}): ErrorRequestHandler` Global error handler middleware that manages `HttpErrors` and unknown errors, returning appropriate JSON responses.
+`httpErrorHandler({dev: boolean, log?: (err) => void}): ErrorRequestHandler` Global error handler middleware that manages `HttpErrors` and unknown errors, returning appropriate JSON responses.
 
 **Usage:**
 
@@ -79,13 +78,13 @@ app.listen(3000, () => {
 import {errorHandler} from 'exlite';
 
 // Basic usage with default options
-app.use(errorHandler({dev: process.env.NODE_ENV !== 'production'}));
+app.use(httpErrorHandler({dev: process.env.NODE_ENV !== 'production'}));
 
 // Custom usage with logging in production mode
 app.use(
-  errorHandler({
+  httpErrorHandler({
     dev: process.env.NODE_ENV !== 'production',
-    write: err => logger.error(err),
+    log: err => logger.error(err),
   }),
 );
 ```
@@ -94,22 +93,6 @@ _Note:_
 
 - _`dev` is a flag that indicates whether the application is running in development mode. If true, error responses will include detailed information like the error message and stack trace. Defaults to true._
 - _`write` is an optional callback function that logs or processes unknown errors. This can be used to log errors to a file or an external service for further inspection._
-
-## HttpError Handler Middleware: `httpErrorHandler`
-
-The `httpErrorHandler` middleware specifically handles `HttpError` instances, sending JSON responses with the error status and message. and `Non-HttpError` errors are passed to the next middleware.
-
-**Usage:**
-
-```typescript
-import {httpErrorHandler} from 'exlite';
-
-app.use(httpErrorHandler); // Place this after route definitions
-```
-
-_**Important Note:**_
-
-- _If you are using `httpErrorHandler`, ensure that you also handle unknown errors appropriately, as it will not log them. It is not recommended to use both `errorHandler` and `httpErrorHandler` simultaneously to avoid conflicts._
 
 ## Wrapper: Simplifying Controllers
 
@@ -228,7 +211,7 @@ export const adminOrUser = permission(Role.ADMIN, Role.USER);
 
 ## Http-Error
 
-The `HttpError` class standardizes error handling by extending the native `Error` class. It’s used to throw HTTP-related errors, which are then caught by the `errorHandler` middleware.
+The `HttpError` class standardizes error handling by extending the native `Error` class. It’s used to throw HTTP-related errors, which are then caught by the `httpErrorHandler` middleware.
 
 **Usage:**
 
